@@ -1,4 +1,4 @@
-`include "./src/sram_word_ab1.sv"
+`include "./src/EPU/MAC/sram_word_ab1.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

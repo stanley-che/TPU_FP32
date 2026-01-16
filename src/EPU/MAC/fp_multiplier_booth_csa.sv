@@ -1,7 +1,7 @@
 // IEEE754 single-precision FP multiplier
 // mantissa multiply replaced by radix-4 Booth + CSA (tree-height reduction)
 //
-`include "./src/mac_booth_fixed_unsigned.sv"
+`include "./src/EPU/MAC/mac_booth_fixed_unsigned.sv"
 `timescale 1ns/1ps
 module fp_multiplier_booth_csa(
         input_a,

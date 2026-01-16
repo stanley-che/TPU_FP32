@@ -1,4 +1,4 @@
-`include "./src/systolic_array_os.sv"
+`include "./src/EPU/MAC/systolic_array_os.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

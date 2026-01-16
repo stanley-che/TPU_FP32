@@ -1,5 +1,5 @@
-`include "./src/c_tile_writer.sv"
-`include "./src/sram_mem_mn_c.sv"
+`include "./src/EPU/MAC/c_tile_writer.sv"
+`include "./src/EPU/MAC/sram_mem_mn_c.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

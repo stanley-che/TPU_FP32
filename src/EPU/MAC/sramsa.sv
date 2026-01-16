@@ -1,6 +1,6 @@
 // tile_compute_system_top.sv
-`include "./src/tile_system_top.sv"
-`include "./src/systolic_wrap_c_sram.sv"
+`include "./src/EPU/MAC/tile_system_top.sv"
+`include "./src/EPU/MAC/systolic_wrap_c_sram.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

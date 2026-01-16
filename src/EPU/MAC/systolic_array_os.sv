@@ -1,4 +1,4 @@
-`include "./src/pe.sv"
+`include "./src/EPU/MAC/pe.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

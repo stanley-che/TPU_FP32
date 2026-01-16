@@ -9,7 +9,7 @@
 | `ACC_STAT`  | 0x33   | 0x01   | 3'b100 | 讀狀態：回傳 `{..., C_valid, done, busy}`     |
 
 */
-`include "./src/sramsa.sv"
+`include "./src/EPU/MAC/sramsa.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

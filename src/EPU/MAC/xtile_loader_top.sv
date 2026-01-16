@@ -1,5 +1,5 @@
-`include "./src/x_sram_to_Xtile_row.sv"
-`include "./src/sram_mem_kn.sv"
+`include "./src/EPU/MAC/x_sram_to_Xtile_row.sv"
+`include "./src/EPU/MAC/sram_mem_kn.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

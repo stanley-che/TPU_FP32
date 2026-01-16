@@ -1,5 +1,5 @@
-`include "./src/w_sram_to_Wtile_col.sv"
-`include "./src/axi_sram_slave.sv"
+`include "./src/EPU/MAC/w_sram_to_Wtile_col.sv"
+`include "./src/EPU/MAC/axi_sram_slave.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

@@ -1,4 +1,4 @@
-`include "./src/axil_2p_sram.sv"
+`include "./src/EPU/MAC/axil_2p_sram.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

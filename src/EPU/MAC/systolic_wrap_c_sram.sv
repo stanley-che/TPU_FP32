@@ -1,6 +1,6 @@
 // systolic_wrap_c_sram.sv  (FULL FLATTEN OUTPUT VERSION)
-`include "./src/sa_tile_driver.sv"
-`include "./src/c_sram_ctrl_flat.sv"
+`include "./src/EPU/MAC/sa_tile_driver.sv"
+`include "./src/EPU/MAC/c_sram_ctrl_flat.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

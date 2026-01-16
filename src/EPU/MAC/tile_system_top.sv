@@ -1,7 +1,7 @@
   // tile_system_top_flat.sv
-  `include "./src/tile_load_controller.sv"
-  `include "./src/wtile_loader_top.sv"
-  `include "./src/xtile_loader_top.sv"
+  `include "./src/EPU/MAC/tile_load_controller.sv"
+  `include "./src/EPU/MAC/wtile_loader_top.sv"
+  `include "./src/EPU/MAC/xtile_loader_top.sv"
   `timescale 1ns/1ps
   `default_nettype none
 

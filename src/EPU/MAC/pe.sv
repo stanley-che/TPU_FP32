@@ -1,6 +1,6 @@
 // pe.sv — IEEE-754 FP32 processing element using dawsonjon/fpu
-`include "./src/fp_adder_driver.sv"
-`include "./src/fp_mul_driver.sv"
+`include "./src/EPU/MAC/fp_adder_driver.sv"
+`include "./src/EPU/MAC/fp_mul_driver.sv"
 `timescale 1ns/1ps
 
 module pe (

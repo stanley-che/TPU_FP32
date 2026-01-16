@@ -5,7 +5,7 @@ vvp ./vvp/tb_rv32i_mac_5cases.vvp
 gtkwave ./vvp/tb_rv32i_mac_5cases.vcd
 */
 
-`include "./src/rv32i_rtype_MAC_top.sv"
+`include "./src/EPU/rv32i_rtype_MAC_top.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
