@@ -1,9 +1,9 @@
 // rv32i_rtype_MAC_top.sv
 /*
-| 指令          | opcode | funct7 | funct3 | 說明                                      |
-| ----------- | ------ | ------ | ------ | --------------------------------------- |
-| `ACC_WWR`   | 0x33   | 0x01   | 3'b000 | 寫 W SRAM：`rs1` packed(row,k)，`rs2`=data |
-| `ACC_XWR`   | 0x33   | 0x01   | 3'b001 | 寫 X SRAM：`rs1` packed(k,n)，`rs2`=data   |
+| instr       | opcode | funct7 | funct3 | explain                                      |
+| ----------- | ------ | ------ | ------ | ---------------------------------------------|
+| `ACC_WWR`   | 0x33   | 0x01   | 3'b000 | 寫 W SRAM：`rs1` packed(row,k)，`rs2`=data    |
+| `ACC_XWR`   | 0x33   | 0x01   | 3'b001 | 寫 X SRAM：`rs1` packed(k,n)，`rs2`=data      |
 | `ACC_START` | 0x33   | 0x01   | 3'b010 | 啟動：`rs1`=K_len（低 16）                    |
 | `ACC_CRD`   | 0x33   | 0x01   | 3'b011 | 讀 C SRAM：`rs1` packed(row,col)，回傳到 `rd` |
 | `ACC_STAT`  | 0x33   | 0x01   | 3'b100 | 讀狀態：回傳 `{..., C_valid, done, busy}`     |
