@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module single_bank_sram #(
+module single_bank_sram_ReLu #(
   parameter integer ADDR_W = 12,
   parameter integer Data_W = 16
 )(

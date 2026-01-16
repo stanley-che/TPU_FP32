@@ -1,9 +1,9 @@
 
-`include "./src/EPU/ReLu/bank_sram.sv"
+`include "./src/EPU/ReLu/bank_sram_ReLu.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
-module matrix_relu_cpu #(
+module matrix_relu_cpu_ReLu #(
   parameter int unsigned NRows  = 8,
   parameter int unsigned NCols  = 8,
   parameter int unsigned NB     = 2,
@@ -80,7 +80,7 @@ module matrix_relu_cpu #(
   assign y_rsp_rdata[0] = y_rsp_rdata_flat[Data_W-1:0];
   assign y_rsp_rdata[1] = y_rsp_rdata_flat[2*Data_W-1:Data_W];
 
-  bank_sram #(.NB(NB), .ADDR_W(ADDR_W), .Data_W(Data_W), .M(M)) u_x_sram (
+  bank_sram_ReLu #(.NB(NB), .ADDR_W(ADDR_W), .Data_W(Data_W), .M(M)) u_x_sram (
     .clk(clk),
     .rst_n(rst_n),
     .req_v(x_req_v),
@@ -92,7 +92,7 @@ module matrix_relu_cpu #(
     .rsp_v(x_rsp_v)
   );
 
-  bank_sram #(.NB(NB), .ADDR_W(ADDR_W), .Data_W(Data_W), .M(M)) u_y_sram (
+  bank_sram_ReLu #(.NB(NB), .ADDR_W(ADDR_W), .Data_W(Data_W), .M(M)) u_y_sram (
     .clk(clk),
     .rst_n(rst_n),
     .req_v(y_req_v),

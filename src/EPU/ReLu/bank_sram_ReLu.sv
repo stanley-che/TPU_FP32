@@ -1,9 +1,9 @@
-`include "./src/EPU/ReLu/single_bank_sram.sv"
-`include "./src/EPU/ReLu/Round_robin.sv"
+`include "./src/EPU/ReLu/single_bank_sram_ReLu.sv"
+`include "./src/EPU/ReLu/Round_robin_ReLu.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
-module bank_sram #(
+module bank_sram_ReLu #(
   parameter integer NB      = 8,   // number of banks
   parameter integer ADDR_W  = 12,
   parameter integer Data_W  = 16,
@@ -73,7 +73,7 @@ module bank_sram #(
       // RR arbiter M -> 1 at bank b
       wire [M-1:0] gnt_bank_now;
       wire         any_gnt_bank;
-      RR_single #(.N(M)) u_rr (
+      RR_single_ReLu #(.N(M)) u_rr (
         .clk      (clk),
         .rst_n    (rst_n),
         .req      (to_bank_req),
@@ -103,7 +103,7 @@ module bank_sram #(
       end
 
       // single-bank SRAM (sync read, 1-cycle)
-      single_bank_sram #(
+      single_bank_sram_ReLu #(
         .ADDR_W (ADDR_W - BANK_W),
         .Data_W (Data_W)
       ) u_sram_single (

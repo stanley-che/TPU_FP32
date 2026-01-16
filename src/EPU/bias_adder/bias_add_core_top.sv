@@ -9,7 +9,7 @@
 | `BA_STAT`     | 0x33   | 0x04   | 3'b100 | 讀狀態：回傳 {.., C_valid, done, busy}               |
 */
 
-`include "./src/EPU/bias_adder/fp_adder_driver.sv"
+`include "./src/EPU/bias_adder/fp_adder_driver_ba.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -138,7 +138,7 @@ end
 
   logic [31:0] a_cur, b_cur;
 
-  fp_adder_driver u_add (
+  fp_adder_driver_ba u_add (
     .clk   (clk),
     .rst   (rst),
     .start (add_start),

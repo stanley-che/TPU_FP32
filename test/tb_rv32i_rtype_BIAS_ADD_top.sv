@@ -366,7 +366,7 @@ module tb_rv32i_rtype_BIAS_ADD_top_5cases;
         exec_insn(F3_BWR, pack_B(j), B_vec[j], 5'd0);
       end
       $display("[CASE %0d] preload X/B done.", case_id);
-      dump_X_B_decimal(M,N);
+
       // optional dump X/B
       //dump_X_B_decimal(M,N);
 

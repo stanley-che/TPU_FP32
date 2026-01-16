@@ -2,9 +2,9 @@
 // Wraps around adder module
 // Provides simple start/done handshake interface
 // parameterized for 32-bit single-precision FP
-`include "./src/EPU/bias_adder/adder.sv"
+`include "./src/EPU/bias_adder/adder_ba.sv"
 `timescale 1ns/1ps
-module fp_adder_driver (
+module fp_adder_driver_ba (
   input  logic        clk,
   input  logic        rst,        // active-high reset (sync)
 
@@ -34,7 +34,7 @@ module fp_adder_driver (
   wire         dut_output_z_ack;
   assign dut_output_z_ack = 1'b1;  // always ready (no backpressure)
 
-  adder dut (
+  adder_ba dut (
     .input_a      (dut_input_a),
     .input_b      (dut_input_b),
     .input_a_stb  (dut_input_a_stb),

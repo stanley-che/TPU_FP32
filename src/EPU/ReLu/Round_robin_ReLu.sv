@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module RR_single #(
+module RR_single_ReLu #(
   parameter integer N = 8
 )(
   input  wire              clk,

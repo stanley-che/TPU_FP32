@@ -6,7 +6,7 @@ iverilog -g2012 -Wall -I./src \
 vvp ./vvp/tb_matrix_relu.vvp
 */
 
-`include "./src/EPU/ReLu/top_relu_cpu.sv"   // <= 你把 matrix_relu_cpu 放的路徑
+`include "./src/EPU/ReLu/top_relu_cpu.sv"   
 `timescale 1ns/1ps
 `default_nettype none
 

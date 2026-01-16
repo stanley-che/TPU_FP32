@@ -81,7 +81,7 @@ module relu_custom_rtype #(
   logic [DATA_W-1:0] cpu_y_rdata;
   logic              cpu_y_rvalid;
 
-  matrix_relu_cpu #(
+  matrix_relu_cpu_ReLu #(
     .NRows(M),
     .NCols(N),
     .NB(NB),

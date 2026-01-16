@@ -2,7 +2,7 @@
 //Copyright (C) Jonathan P Dawson 2013
 //2013-12-12
 `timescale 1ns/100ps
-module adder(
+module adder_ba(
         input_a,
         input_b,
         input_a_stb,
