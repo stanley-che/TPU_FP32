@@ -443,8 +443,8 @@ endtask
     // 4.(7,2)*(2,7)
     // 5.(8,8)*(8,8)
     run_case(1, 8, 8, 4);
-    //run_case(2, 6, 7, 8);
-    run_case(2, 4, 4, 4);
+    run_case(2, 6, 7, 8);
+    run_case(3, 4, 4, 4);
     run_case(4, 7, 7, 2);
     run_case(5, 8, 8, 8);
 

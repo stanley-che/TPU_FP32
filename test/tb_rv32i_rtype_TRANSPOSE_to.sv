@@ -1,34 +1,29 @@
 // tb_rv32i_rtype_TRANSPOSE_top.sv
 /*
 iverilog -g2012 -Wall -I./src \
-  -o ./vvp/tb_tp.vvp \
+  -o ./vvp/tb_tp1.vvp \
   ./test/tb_rv32i_rtype_TRANSPOSE_to.sv
 
-vvp ./vvp/tb_tp.vvp
+vvp ./vvp/tb_tp1.vvp
 */
+
 
 `include "./src/EPU/rv32i_rtype_TRANSPOSE_top.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
 
-module tb_rv32i_rtype_TRANSPOSE_top_iverilog;
+module tb_tp_custom_rtype_fp32;
 
-  // ----------------------------
-  // Match DUT parameters
-  // ----------------------------
-  localparam integer NRows  = 8;
-  localparam integer NCols  = 8;
-  localparam integer DATA_W = 32;
-  localparam integer ADDR_W = 16;
-  localparam integer NB     = 2;
-  localparam integer M      = 6;
+  localparam int unsigned NRows  = 8;
+  localparam int unsigned NCols  = 8;
+  localparam int unsigned DATA_W = 32;
+  localparam int unsigned ADDR_W = 16;
+  localparam int unsigned NB     = 2;
 
-  // ----------------------------
-  // Clock / Reset
-  // ----------------------------
-  reg clk;
-  reg rst;
+  // clock/reset
+  logic clk;
+  logic rst;
 
   initial begin
     clk = 1'b0;
@@ -36,28 +31,28 @@ module tb_rv32i_rtype_TRANSPOSE_top_iverilog;
   end
 
   // ----------------------------
-  // DUT CPU custom instruction IF
+  // Custom-instr interface signals
   // ----------------------------
-  reg         instr_valid;
-  wire        instr_ready;
-  reg  [31:0] instr;
-  reg  [31:0] rs1_val;
-  reg  [31:0] rs2_val;
-  reg  [4:0]  rd_addr;
+  logic        instr_valid;
+  logic        instr_ready;
+  logic [31:0] instr;
+  logic [31:0] rs1_val;
+  logic [31:0] rs2_val;
+  logic [4:0]  rd_addr;
 
-  wire        rd_we;
-  wire [4:0]  rd_waddr;
-  wire [31:0] rd_wdata;
+  logic        rd_we;
+  logic [4:0]  rd_waddr;
+  logic [31:0] rd_wdata;
 
-  wire        accel_done;
+  logic accel_busy, accel_done, accel_C_valid;
 
-  rv32i_rtype_TRANSPOSE_top #(
-    .NRows(NRows),
-    .NCols(NCols),
+  // DUT: wrapper
+  transpose_custom_rtype #(
+    .M(NRows),
+    .N(NCols),
     .DATA_W(DATA_W),
     .ADDR_W(ADDR_W),
-    .NB(NB),
-    .M(M)
+    .NB(NB)
   ) dut (
     .clk(clk),
     .rst(rst),
@@ -73,301 +68,209 @@ module tb_rv32i_rtype_TRANSPOSE_top_iverilog;
     .rd_waddr(rd_waddr),
     .rd_wdata(rd_wdata),
 
-    .accel_done(accel_done)
+    .accel_busy(accel_busy),
+    .accel_done(accel_done),
+    .accel_C_valid(accel_C_valid)
   );
 
   // ----------------------------
-  // funct3 codes
+  // helpers: fp32 bits
   // ----------------------------
-  localparam [2:0] TP_AWR   = 3'b000;
-  localparam [2:0] TP_START = 3'b001;
-  localparam [2:0] TP_STAT  = 3'b010;
-  localparam [2:0] TP_BRD   = 3'b011;
-
-  // ----------------------------
-  // Helpers: build instr / pack rc
-  // ----------------------------
-  function [31:0] mk_instr;
-    input [2:0] f3;
-    reg [31:0] x;
+  function automatic [31:0] fp32_bits(input int r, input int c);
     begin
-      x = 32'b0;
-      x[14:12] = f3;
-      mk_instr = x;
-    end
-  endfunction
-
-  function [31:0] pack_rc;
-    input integer r;
-    input integer c;
-    reg [31:0] x;
-    begin
-      x = 32'b0;
-      x[15:8] = r[7:0];
-      x[7:0]  = c[7:0];
-      pack_rc = x;
-    end
-  endfunction
-
-  function [31:0] gen_a;
-    input integer r;
-    input integer c;
-    begin
-      // unique pattern for debug
-      gen_a = {r[15:0], c[15:0]} ^ 32'hA5A5_0000;
+      fp32_bits = 32'h3f800000 + (r << 8) + c;
     end
   endfunction
 
   // ----------------------------
-  // Basic waits
+  // R-type encode helper
+  // instr[31:25]=funct7, [24:20]=rs2, [19:15]=rs1, [14:12]=funct3,
+  // [11:7]=rd, [6:0]=opcode
   // ----------------------------
-  task wait_cycles;
-    input integer n;
-    integer i;
+  function automatic [31:0] enc_rtype(
+    input [6:0] funct7,
+    input [4:0] rs2,
+    input [4:0] rs1,
+    input [2:0] funct3,
+    input [4:0] rd,
+    input [6:0] opcode
+  );
     begin
-      for (i = 0; i < n; i = i + 1) @(posedge clk);
+      enc_rtype = {funct7, rs2, rs1, funct3, rd, opcode};
     end
+  endfunction
+
+  // constants (match your table)
+  localparam [6:0] OPC_RTYPE = 7'h33;
+  localparam [6:0] F7_TP     = 7'h02;
+
+  localparam [2:0] F3_AWR    = 3'b000;
+  localparam [2:0] F3_START  = 3'b001;
+  localparam [2:0] F3_STAT   = 3'b010;
+  localparam [2:0] F3_BRD    = 3'b011;
+
+  // ----------------------------
+  // drive protocol tasks
+  // ----------------------------
+
+  task automatic wait_cycles(input int n);
+    for (int i=0; i<n; i++) @(posedge clk);
   endtask
 
-  // ----------------------------
-  // Issue one instruction handshake (NO break)
-  // Hold instr_valid until instr_ready observed high at posedge.
-  // ----------------------------
-  task issue_instr;
-    input [2:0]  f3;
-    input [31:0] rs1;
-    input [31:0] rs2;
-    input [4:0]  rd;
-    integer guard;
-    reg accepted;
+  // One instruction issue (handshake). Leaves instr_valid low after handshake.
+  task automatic issue_instr(
+    input [31:0] instr_i,
+    input [31:0] rs1_i,
+    input [31:0] rs2_i,
+    input [4:0]  rd_i
+  );
     begin
-      instr       <= mk_instr(f3);
-      rs1_val     <= rs1;
-      rs2_val     <= rs2;
-      rd_addr     <= rd;
-      instr_valid <= 1'b1;
+      // wait until ready
+      while (!instr_ready) @(posedge clk);
 
-      guard    = 0;
-      accepted = 0;
+      @(negedge clk);
+      instr       <= instr_i;
+      rs1_val      <= rs1_i;
+      rs2_val      <= rs2_i;
+      rd_addr      <= rd_i;
+      instr_valid  <= 1'b1;
 
-      while (!accepted) begin
-        @(posedge clk);
-        guard = guard + 1;
-        if (instr_ready) accepted = 1;
-        if (guard > 5000) begin
-          $display("[TB] issue_instr TIMEOUT f3=%b (instr_ready stuck low)", f3);
-          $fatal(1);
-        end
-      end
+      // hold until accepted (usually 1 cycle)
+      do @(posedge clk); while (!(instr_valid && instr_ready));
 
-      // drop valid after accept
       @(negedge clk);
       instr_valid <= 1'b0;
-      instr       <= 32'b0;
-      rs1_val     <= 32'b0;
-      rs2_val     <= 32'b0;
-      rd_addr     <= 5'd0;
     end
   endtask
 
-  // ----------------------------
-  // Wait for rd_we (STAT or BRD returns)
-  // ----------------------------
-  task wait_rd;
-    output reg [31:0] data;
-    input integer max_cycles;
-    integer k;
-    reg seen;
+  // AWR: write A[row,col] = data
+  task automatic TP_AWR(input int r, input int c, input [31:0] data);
+    reg [31:0] rs1_pack;
+    reg [31:0] inst;
     begin
-      data = 32'h0;
-      k    = 0;
-      seen = 0;
+      rs1_pack = {r[15:0], c[15:0]}; // rs1={row[15:0],col[15:0]}
+      inst     = enc_rtype(F7_TP, 5'd0, 5'd0, F3_AWR, 5'd0, OPC_RTYPE);
+      issue_instr(inst, rs1_pack, data, 5'd0);
+    end
+  endtask
 
-      while ((k < max_cycles) && (!seen)) begin
-        @(posedge clk);
-        k = k + 1;
-        if (rd_we) begin
-          data = rd_wdata;
-          seen = 1;
-        end
-      end
+  // START
+  task automatic TP_START();
+    reg [31:0] inst;
+    begin
+      inst = enc_rtype(F7_TP, 5'd0, 5'd0, F3_START, 5'd0, OPC_RTYPE);
+      issue_instr(inst, 32'b0, 32'b0, 5'd0);
+    end
+  endtask
 
-      if (!seen) begin
-        $display("[TB] wait_rd TIMEOUT (never saw rd_we)");
+  // STAT: return {done,busy} in [1:0]
+  task automatic TP_STAT(output logic done_o, output logic busy_o);
+  reg [31:0] inst;
+  int guard;
+  begin
+    inst = enc_rtype(F7_TP, 5'd0, 5'd0, F3_STAT, 5'd1, OPC_RTYPE);
+    issue_instr(inst, 32'b0, 32'b0, 5'd1);
+
+    guard = 0;
+    while (!rd_we) begin
+      @(posedge clk);
+      guard++;
+      if (guard > 1000) begin
+        $display("[TB] TP_STAT TIMEOUT");
         $fatal(1);
       end
     end
-  endtask
-
-  // ----------------------------
-  // High-level ops
-  // ----------------------------
-  task tp_awr;
-    input integer r;
-    input integer c;
-    input [31:0] data;
-    begin
-      issue_instr(TP_AWR, pack_rc(r,c), data, 5'd0);
-      // note: DUT's TP_AWR doesn't return rd
-    end
-  endtask
-
-  task tp_start;
-    begin
-      issue_instr(TP_START, 32'b0, 32'b0, 5'd0);
-    end
-  endtask
-
-  task tp_stat;
-  output reg busy;
-  output reg done;
-  reg seen;
-  begin
-    seen = 0;
-
-    // 發送 STAT
-    instr       <= mk_instr(TP_STAT);
-    rs1_val     <= 32'b0;
-    rs2_val     <= 32'b0;
-    rd_addr     <= 5'd1;
-    instr_valid <= 1'b1;
-
-    // 等 accept + 立刻抓 rd
-    while (!seen) begin
-      @(posedge clk);
-      if (instr_ready) begin
-        // 同一拍 rd_we 就有效
-        busy = rd_wdata[1];
-        done = rd_wdata[0];
-        seen = 1;
-      end
-    end
-
-    @(negedge clk);
-    instr_valid <= 1'b0;
-    instr       <= 32'b0;
+    done_o = rd_wdata[0];
+    busy_o = rd_wdata[1];
   end
-endtask
+  endtask
 
 
-  task tp_brd;
-    input integer r;
-    input integer c;
-    output reg [31:0] data;
+  // BRD: read B[row,col] -> returns data (wait for rd_we)
+  task automatic TP_BRD(input int r, input int c, output logic [31:0] data_o);
+    reg [31:0] rs1_pack;
+    reg [31:0] inst;
+    int guard;
     begin
-      issue_instr(TP_BRD, pack_rc(r,c), 32'b0, 5'd2);
-      wait_rd(data, 5000);
+      rs1_pack = {r[15:0], c[15:0]};
+      inst     = enc_rtype(F7_TP, 5'd0, 5'd0, F3_BRD, 5'd2, OPC_RTYPE);
+
+      issue_instr(inst, rs1_pack, 32'b0, 5'd2);
+
+      // wrapper會 stall，等 cpu_b_rvalid 回來那拍 rd_we=1
+      guard = 0;
+      data_o = 32'h0;
+      while (!rd_we) begin
+        @(posedge clk);
+        guard++;
+        if (guard > 5000) begin
+          $display("[TB] TP_BRD TIMEOUT r=%0d c=%0d", r, c);
+          $fatal(1);
+        end
+      end
+      data_o = rd_wdata;
     end
   endtask
-  task scan_b_for_x;
-  integer rr, cc;
-  reg [31:0] d;
-  integer xcnt, tot;
-  begin
-    xcnt = 0; tot = 0;
-    for (rr = 0; rr < NRows; rr = rr + 1) begin
-      for (cc = 0; cc < NCols; cc = cc + 1) begin
-        tp_brd(rr, cc, d);
-        tot = tot + 1;
-        if (^d === 1'bx) xcnt = xcnt + 1; // reduction XOR becomes X if any bit X
-      end
-    end
-    $display("[TB] B scan: X_count=%0d / %0d", xcnt, tot);
-  end
-endtask
-  task tp_brd_dbg;
-  input integer r;
-  input integer c;
-  output reg [31:0] data;
-  integer cyc;
-  begin
-    // issue BRD
-    issue_instr(TP_BRD, pack_rc(r,c), 32'b0, 5'd2);
-
-    // wait for rd_we (which happens on B_rsp_v)
-    cyc = 0;
-    data = 32'h0;
-    while (cyc < 5000) begin
-      @(posedge clk);
-      cyc = cyc + 1;
-      if (rd_we) begin
-        data = rd_wdata;
-        $display("[TB] BRD(r=%0d,c=%0d) rd_we@+%0d data=0x%08x", r,c,cyc,data);
-        cyc = 5000;
-      end
-    end
-    if (!rd_we) begin
-      $display("[TB] BRD timeout r=%0d c=%0d", r, c);
-      $fatal(1);
-    end
-  end
-endtask
 
   // ----------------------------
-  // Main test
+  // main test
   // ----------------------------
-  integer r, c;
-  reg busy, done;
-  reg [31:0] got;
-  integer polls;
+  int r,c;
+  logic [31:0] got, exp;
+  logic stat_done, stat_busy;
 
   initial begin
-    $dumpfile("./vvp/tb_tp.vcd");
-    $dumpvars(0, tb_rv32i_rtype_TRANSPOSE_top_iverilog);
+    $dumpfile("./vvp/tb_tp_custom.vcd");
+    $dumpvars(0, tb_tp_custom_rtype_fp32);
 
-    // init inputs
-    instr_valid = 1'b0;
-    instr       = 32'b0;
-    rs1_val     = 32'b0;
-    rs2_val     = 32'b0;
-    rd_addr     = 5'd0;
-
-    // reset
+    // init
     rst = 1'b1;
+    instr_valid = 1'b0;
+    instr = 32'b0;
+    rs1_val = 32'b0;
+    rs2_val = 32'b0;
+    rd_addr = 5'd0;
+
     wait_cycles(5);
     rst = 1'b0;
     wait_cycles(5);
 
-    // preload A
-    $display("[TB] Preload A SRAM...");
-    for (r = 0; r < NRows; r = r + 1) begin
-      for (c = 0; c < NCols; c = c + 1) begin
-        tp_awr(r, c, gen_a(r,c));
+    // preload A via TP_AWR
+    $display("[TB] preload A FP32 via TP_AWR...");
+    for (r=0; r<NRows; r++) begin
+      for (c=0; c<NCols; c++) begin
+        TP_AWR(r, c, fp32_bits(r,c));
       end
     end
 
     // start transpose
     $display("[TB] TP_START...");
-    tp_start();
+    TP_START();
 
-    // poll stat
-    $display("[TB] Poll TP_STAT until done...");
-    done  = 1'b0;
-    polls = 0;
-    while ((!done) && (polls < 20000)) begin
-      tp_stat(busy, done);
-      polls = polls + 1;
-    end
-    if (!done) begin
-      $display("[TB] FAIL: never saw done=1 (polls=%0d)", polls);
-      $fatal(1);
-    end
-    $display("[TB] Done seen! busy=%0d done=%0d polls=%0d", busy, done, polls);
+    // poll status until done
+    $display("[TB] polling TP_STAT...");
+    do begin
+      TP_STAT(stat_done, stat_busy);
+      @(posedge clk);
+    end while (!stat_done);
 
-    // readback & check
-    $display("[TB] Read back via TP_BRD and check BRD(r,c)==A[r,c] ...");
-    for (r = 0; r < NRows; r = r + 1) begin
-      for (c = 0; c < NCols; c = c + 1) begin
-        tp_brd(r, c, got);
-        if (got !== gen_a(r,c)) begin
-          $display("[TB][FAIL] r=%0d c=%0d got=0x%08x exp=0x%08x",
-                   r, c, got, gen_a(r,c));
+    $display("[TB] done!");
+
+    // read back B[col,row] and compare to A[row,col]
+    $display("[TB] check B transpose via TP_BRD...");
+    for (r=0; r<NRows; r++) begin
+      for (c=0; c<NCols; c++) begin
+        TP_BRD(c, r, got);       // B[rowp=col][colp=row]
+        exp = fp32_bits(r,c);
+        if (got !== exp) begin
+          $display("[TB][FAIL] A(%0d,%0d)=0x%08x but B(%0d,%0d)=0x%08x",
+                   r, c, exp, c, r, got);
           $fatal(1);
         end
       end
     end
 
-    $display("[TB][PASS] All checks passed.");
+    $display("[TB][PASS] FP32 transpose correct (custom R-type).");
     wait_cycles(10);
     $finish;
   end
