@@ -17,10 +17,8 @@ module tb_rv32i_rtype_BIAS_ADD_top_5cases;
   // =========================
   localparam int unsigned M_DUT  = 8;
   localparam int unsigned N_DUT  = 8;
-
   localparam int unsigned DATA_W = 32;
   localparam int unsigned BYTE_W = DATA_W/8;
-
   localparam int unsigned ROW_W  = (M_DUT<=1)?1:$clog2(M_DUT);
   localparam int unsigned COL_W  = (N_DUT<=1)?1:$clog2(N_DUT);
 

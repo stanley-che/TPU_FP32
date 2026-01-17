@@ -96,7 +96,16 @@ module layer_sequencer #(
       pack_mac_row_k = t;
     end
   endfunction
-
+  function automatic logic [31:0] pack_am_row_col(input int unsigned r, input int unsigned c);
+  logic [31:0] t;
+  begin
+    t = 32'b0;
+    t[COL_W-1:0]                  = c[COL_W-1:0];
+    t[COL_W +: ROW_W]             = r[ROW_W-1:0];
+    pack_am_row_col = t;
+  end
+  endfunction
+  
   function automatic logic [31:0] pack_mac_k_n(input int unsigned k, input int unsigned nidx);
     logic [31:0] t;
     begin
@@ -598,9 +607,7 @@ assign accel_done = done_latched;
             if (!u_valid) begin
               // AM_XWR: funct3=000 (argmax 用 low-bit row/col pack)
               // 這裡把 relu 的 (r,c) 直接當 logits SRAM 的 (row,col)
-              issue_uop(T_AM, mk_instr(F7_AM, 3'b000),
-          pack_am_row_col(r_cnt,c_cnt),
-          tmp_data, 5'd0);
+              issue_uop(T_AM, mk_instr(F7_AM, 3'b000),pack_low_row_col(r_cnt,c_cnt),tmp_data, 5'd0);
 
 
               if (c_cnt == N-1) begin

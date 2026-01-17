@@ -1,4 +1,4 @@
-`include "src/define.v"
+`include "./src/CPU/define.v"
 
 module ALU (
     input      [ 4:0] opcode,

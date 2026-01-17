@@ -1,4 +1,4 @@
-`include "src/define.v"
+`include "./src/CPU/define.v"
 
 module Imm_Ext (
     input [31:0] inst,

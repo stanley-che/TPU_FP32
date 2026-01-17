@@ -17,7 +17,7 @@ vvp ./vvp/tb_sramsa_fixedexp.vvp
 - C 的 expected：沿用你原本 tb_cwrap_case_fixedexp 的 8x8 KLEN=4 base 表做 slice
 */
 
-`include "./src/sramsa.sv"
+`include "./src/EPU/MAC/sramsa.sv"
 `timescale 1ns/1ps
 `default_nettype none
 

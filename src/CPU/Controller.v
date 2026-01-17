@@ -1,4 +1,4 @@
-`include "src/define.v"
+`include "./src/CPU/define.v"
 module Controller (
     input            clk,
     input            rst,

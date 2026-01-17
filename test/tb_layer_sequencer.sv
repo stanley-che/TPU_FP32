@@ -183,15 +183,7 @@ module tb_layer_sequencer;
     end
   endfunction
   // Argmax packer: col in low bits, row above it
-  function automatic logic [31:0] pack_am_row_col(input int unsigned r, input int unsigned c);
-  logic [31:0] t;
-  begin
-    t = 32'b0;
-    t[COL_W-1:0]                  = c[COL_W-1:0];
-    t[COL_W +: ROW_W]             = r[ROW_W-1:0];
-    pack_am_row_col = t;
-  end
-  endfunction
+  
 
   // ------------------------------------------------------------
   // FP32 常數 (logits 設計)

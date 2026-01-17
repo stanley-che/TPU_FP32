@@ -9,7 +9,7 @@ Phase A: CPU preload W/X SRAM (fixed-exp pattern, for C expected)
 Phase B: pulse start + K_len => tile loaders stream tiles, per-beat scoreboard check
 Phase C: wait sa done => CPU readback C SRAM => compare vs base expected (8x8, KLEN=4)
 */
-`include "./src/sramsa.sv"
+`include "./src/EPU/MAC/sramsa.sv"
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -233,35 +233,35 @@ module tb_tile_compute_system_e2e_fixedexp;
   // ============================================================
   // CPU read helper: read one (row,col) from C SRAM
   // ============================================================
+    // ============================================================
+  // CPU read helper: read one (row,col) from C SRAM
+  // - keep c_rd_en always 1
+  // - hold c_rd_re high until c_rd_rvalid
+  // - keep addr stable while waiting
+  // - add 1-cycle gap to avoid back-to-back hazard
+  // ============================================================
   task automatic cpu_read_c_word(input int r, input int c, output logic [31:0] data);
     int unsigned timeout;
     begin
-      // idle
+      data = '0;
+
+      // (optional) ensure we start from re=0
       @(negedge clk);
-      c_rd_en  <= 1'b0;
       c_rd_re  <= 1'b0;
-      c_rd_row <= '0;
-      c_rd_col <= '0;
 
-      // wait rvalid drop
-      timeout = 0;
-      while (c_rd_rvalid === 1'b1) begin
-        @(posedge clk);
-        timeout++;
-        if (timeout > 1_000_000) $fatal(1, "[TB] TIMEOUT waiting c_rd_rvalid drop");
-      end
-
-      // request on negedge
+      // request
       @(negedge clk);
       c_rd_row <= r[ROW_W-1:0];
       c_rd_col <= c[COL_W-1:0];
-      c_rd_en  <= 1'b1;
       c_rd_re  <= 1'b1;
 
-      // wait response
+      // wait response (keep addr + re stable)
       timeout = 0;
       while (c_rd_rvalid !== 1'b1) begin
         @(posedge clk);
+        c_rd_row <= r[ROW_W-1:0];
+        c_rd_col <= c[COL_W-1:0];
+        c_rd_re  <= 1'b1;
         timeout++;
         if (timeout > 5_000_000) $fatal(1, "[TB] TIMEOUT cpu_read_c_word r=%0d c=%0d", r, c);
       end
@@ -269,9 +269,12 @@ module tb_tile_compute_system_e2e_fixedexp;
       #1;
       data = c_rd_rdata;
 
+      // deassert request
       @(negedge clk);
-      c_rd_en <= 1'b0;
       c_rd_re <= 1'b0;
+
+      // 1-cycle gap (avoid wrapper alias / stale rdata)
+      @(posedge clk);
     end
   endtask
 
