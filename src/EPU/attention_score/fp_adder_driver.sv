@@ -1,3 +1,5 @@
+`ifndef FP_ADDER_DRIVER_SV
+`define FP_ADDER_DRIVER_SV
 // Floating-point adder driver
 // Wraps around adder module
 // Provides simple start/done handshake interface
@@ -131,3 +133,4 @@ module fp_adder_driver (
   end
 
 endmodule
+`endif

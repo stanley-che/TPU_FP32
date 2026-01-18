@@ -1,3 +1,5 @@
+`ifndef MAC_BOOTH_FIXED_UNSIGNED_SV
+`define MAC_BOOTH_FIXED_UNSIGNED_SV
 //radix-4 booth multiplier-accumulator for unsigned inputs
 //`timescale 1ns/1ps
 `timescale 1ns/1ps
@@ -128,3 +130,4 @@ module mac_booth_fixed_unsigned #(
     end
 
 endmodule
+`endif

@@ -1,3 +1,5 @@
+`ifndef AXI_SRAM_SLAVE_SV
+`define AXI_SRAM_SLAVE_SV
 `include "./src/EPU/attention_score/axil_2p_sram.sv"
 `timescale 1ns/1ps
 `default_nettype none
@@ -72,3 +74,4 @@ module sram_mem_mn #(
 endmodule
 
 `default_nettype wire
+`endif

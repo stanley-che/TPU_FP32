@@ -1,6 +1,8 @@
 //IEEE Floating Point Adder (Single Precision)
 //Copyright (C) Jonathan P Dawson 2013
 //2013-12-12
+`ifndef ADDER_SV
+`define ADDER_SV
 `timescale 1ns/100ps
 module adder(
         input_a,
@@ -289,3 +291,4 @@ module adder(
   assign output_z = s_output_z;
 
 endmodule
+`endif

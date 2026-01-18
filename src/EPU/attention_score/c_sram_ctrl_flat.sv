@@ -1,3 +1,5 @@
+`ifndef C_SRAM_CRTL_FLAT_SV
+`define C_SRAM_CRTL_FLAT_SV
 `include "./src/EPU/attention_score/c_tile_writer.sv"
 `include "./src/EPU/attention_score/sram_mem_mn_c.sv"
 `timescale 1ns/1ps
@@ -228,3 +230,4 @@ assign c_valid_flat_o = c_valid_clean;
 endmodule
 
 `default_nettype wire
+`endif

@@ -1,3 +1,5 @@
+`ifndef SRAM_WORD_ABD_SV
+`define SRAM_WORD_ABD_SV  
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -87,3 +89,4 @@ module sram_word_abD #(
 endmodule
 
 `default_nettype wire
+`endif

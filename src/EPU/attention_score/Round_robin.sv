@@ -1,3 +1,5 @@
+`ifndef ROUND_ROBIN_SV
+`define ROUND_ROBIN_SV
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -60,3 +62,4 @@ module RR_single #(
 endmodule
 
 `default_nettype wire
+`endif

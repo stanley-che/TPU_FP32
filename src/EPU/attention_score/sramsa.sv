@@ -1,3 +1,5 @@
+`ifndef SRAMSA_SV
+`define SRAMSA_SV
 // tile_compute_system_top.sv
 `include "./src/EPU/attention_score/tile_system_top.sv"
 `include "./src/EPU/attention_score/systolic_wrap_c_sram.sv"
@@ -132,3 +134,4 @@ module tile_compute_system_top #(
 endmodule
 
 `default_nettype wire
+`endif

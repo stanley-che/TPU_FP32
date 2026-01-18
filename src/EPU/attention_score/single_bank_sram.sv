@@ -1,3 +1,5 @@
+`ifndef SINGLE_BANK_SRAM_SV
+`define SINGLE_BANK_SRAM_SV
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -35,4 +37,4 @@ module single_bank_sram #(
 endmodule
 
 `default_nettype wire
-
+`endif

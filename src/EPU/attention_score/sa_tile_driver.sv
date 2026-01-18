@@ -1,3 +1,5 @@
+`ifndef SA_TILE_DRIVER_SV
+`define SA_TILE_DRIVER_SV
 `include "./src/EPU/attention_score/systolic_array_os.sv"
 `timescale 1ns/1ps
 `default_nettype none
@@ -140,3 +142,4 @@ module sa_tile_driver_flat #(
 endmodule
 
 `default_nettype wire
+`endif

@@ -1,3 +1,5 @@
+`ifndef FP_MUL_DRIVER_SV
+`define FP_MUL_DRIVER_SV
 // Floating-point multiplier driver using Booth encoding and CSA
 // Wraps around fp_multiplier_booth_csa module
 // Provides simple start/done handshake interface
@@ -144,3 +146,4 @@ module fp_mul_driver (
   end
 
 endmodule
+`endif

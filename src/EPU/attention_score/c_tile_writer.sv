@@ -1,3 +1,5 @@
+`ifndef C_TILE_WRITER_SV
+`define C_TILE_WRITER_SV
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -123,3 +125,4 @@ module c_tile_writer_flat #(
 endmodule
 
 `default_nettype wire
+`endif

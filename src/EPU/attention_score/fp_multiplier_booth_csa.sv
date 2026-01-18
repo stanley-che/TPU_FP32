@@ -1,3 +1,5 @@
+`ifndef FP_MULTIPLIER_BOOTH_CSA_SV
+`define FP_MULTIPLIER_BOOTH_CSA_SV
 // IEEE754 single-precision FP multiplier
 // mantissa multiply replaced by radix-4 Booth + CSA (tree-height reduction)
 //
@@ -292,3 +294,4 @@ module fp_multiplier_booth_csa(
   assign output_z = s_output_z;
 
 endmodule
+`endif

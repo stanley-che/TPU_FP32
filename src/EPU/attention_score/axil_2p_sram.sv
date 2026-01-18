@@ -1,3 +1,5 @@
+`ifndef AXIL_2P_SRAM_SV
+`define AXIL_2P_SRAM_SV
 `timescale 1ns/1ps
 `default_nettype none
 
@@ -87,3 +89,4 @@ module sram_word_ab #(
 endmodule
 
 `default_nettype wire
+`endif

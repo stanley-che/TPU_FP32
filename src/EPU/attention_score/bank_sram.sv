@@ -1,3 +1,5 @@
+`ifndef BANK_SRAM_SV
+`define BANK_SRAM_SV
 `include "./src/EPU/attention_score/single_bank_sram.sv"
 `include "./src/EPU/attention_score/Round_robin.sv"
 `timescale 1ns/1ps
@@ -167,3 +169,4 @@ endmodule
 
 `default_nettype wire
 
+`endif

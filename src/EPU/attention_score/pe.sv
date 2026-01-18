@@ -1,3 +1,5 @@
+`ifndef PE_SV
+`define PE_SV
 // pe.sv — IEEE-754 FP32 processing element using dawsonjon/fpu
 `include "./src/EPU/attention_score/fp_adder_driver.sv"
 `include "./src/EPU/attention_score/fp_mul_driver.sv"
@@ -108,3 +110,4 @@ module pe (
   end
 
 endmodule
+`endif

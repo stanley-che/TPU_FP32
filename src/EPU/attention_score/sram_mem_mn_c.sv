@@ -1,3 +1,5 @@
+`ifndef SRAM_MEM__MN_C_SV
+`define SRAM_MEM__MN_C_SV
 `include "./src/EPU/attention_score/sram_word_abD.sv"
 `timescale 1ns/1ps
 `default_nettype none
@@ -76,3 +78,4 @@ module sram_mem_mn_c #(
 endmodule
 
 `default_nettype wire
+`endif
